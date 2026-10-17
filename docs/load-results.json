@@ -1,0 +1,22 @@
+{
+  "users": 10000,
+  "concurrency": 200,
+  "hotseat": false,
+  "reservation_seconds": 27.433,
+  "requests_per_second": 364.53,
+  "status_codes": {
+    "201": 500,
+    "409": 9500
+  },
+  "transport_errors": {},
+  "latency_ms": {
+    "p50": 360.56,
+    "p95": 1651.38,
+    "max": 5895.26
+  },
+  "successful_reservations": 500,
+  "unique_winning_seats": 500,
+  "confirmed": 500,
+  "expected_winners": 500,
+  "passed": true
+}

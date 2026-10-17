@@ -1,0 +1,27 @@
+name: PostgreSQL integration tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: lastseat
+          POSTGRES_PASSWORD: lastseat
+          POSTGRES_DB: lastseat_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U lastseat -d lastseat_test'
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgresql+psycopg://lastseat:lastseat@localhost:5432/lastseat_test
+      ALLOW_TEST_RESET: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r requirements-lock.txt
+      - run: pytest -q
+      - run: docker compose config --quiet

@@ -1,0 +1,46 @@
+x-app: &app
+  build: .
+  environment:
+    DATABASE_URL: postgresql+psycopg://lastseat:${POSTGRES_PASSWORD:-lastseat}@db:5432/lastseat
+    RESERVATION_TTL_SECONDS: ${RESERVATION_TTL_SECONDS:-120}
+    BOOKING_OPENS_AT: ${BOOKING_OPENS_AT:-2026-01-01T18:00:00+05:30}
+  depends_on:
+    init:
+      condition: service_completed_successfully
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lastseat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lastseat}
+      POSTGRES_DB: lastseat
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U lastseat -d lastseat']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  init:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://lastseat:${POSTGRES_PASSWORD:-lastseat}@db:5432/lastseat
+      BOOKING_OPENS_AT: ${BOOKING_OPENS_AT:-2026-01-01T18:00:00+05:30}
+    command: [python, -m, app.init_db]
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    <<: *app
+    ports: ['8000:8000']
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  worker:
+    <<: *app
+    command: [python, -m, app.worker]
+    restart: unless-stopped
+volumes:
+  pgdata:

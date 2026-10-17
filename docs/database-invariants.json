@@ -1,0 +1,12 @@
+{
+  "reservations": {
+    "total": 500,
+    "confirmed": 500,
+    "distinct_seats": 500
+  },
+  "duplicate_active_seats": [],
+  "payments": {
+    "total": 500,
+    "succeeded": 500
+  }
+}
